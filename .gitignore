@@ -1,0 +1,6 @@
+scripts/node_modules/
+scripts/.venv/
+screenshots/_sheet.html
+screenshots/interact/
+entrega/*.zip
+.DS_Store

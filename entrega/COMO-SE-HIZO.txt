@@ -1,0 +1,1705 @@
+======================================================================
+  LA PLACA BASE POR DENTRO — CÓMO SE HIZO
+  Autor: Atarponu
+  Placa base elegida: ASUS TUF GAMING B650-PLUS WIFI (AM5 · ATX · DDR5)
+  Fecha: 30 de septiembre de 2026
+======================================================================
+
+Este documento explica con qué herramientas se hizo la presentación,
+qué "skills" (módulos de instrucciones para la IA) se usaron, cuáles
+fueron los pasos del proceso y cuál fue el prompt original.
+
+
+----------------------------------------------------------------------
+1. RESUMEN
+----------------------------------------------------------------------
+
+La presentación es una página web interactiva (HTML + CSS + JavaScript)
+de 24 escenas sobre los componentes de una placa base.
+
+La desarrolló un asistente de IA, Claude Code (modelo Claude Opus 5.5,
+de Anthropic), en la terminal del ordenador. Atarponu dirigió el
+trabajo: escribió el prompt, eligió las opciones de las preguntas
+iniciales y pidió después los cambios (autoría, placa elegida, música
+y efectos de sonido).
+
+Nota: la presentación tiene ahora 25 escenas (se añadió "La placa en vivo").
+
+Archivos de la entrega:
+  · la-placa-base-por-dentro.html        → presentación principal (un solo
+                                           archivo, funciona sin internet)
+  · la-placa-base-por-dentro.pdf         → versión estática, sin animaciones
+  · la-placa-base-por-dentro-proyecto.zip → código fuente completo, README,
+                                           scripts de pruebas y exportaciones
+  · COMO-SE-HIZO.txt                     → este documento
+
+
+----------------------------------------------------------------------
+2. SKILLS Y HERRAMIENTAS
+----------------------------------------------------------------------
+
+SKILLS DE CLAUDE CODE
+  · frontend-slides (plugin de zarazhangrui, github.com/zarazhangrui/
+    frontend-slides, versión 2.1.0). Se instaló con:
+        /plugin marketplace add https://github.com/zarazhangrui/frontend-slides
+        /plugin install frontend-slides@frontend-slides
+    Se invocó con /frontend-slides:frontend-slides. De esta skill se tomó:
+      - el escenario fijo de 1920 × 1080 que se escala entero a cualquier
+        pantalla (viewport-base.css, incluido tal cual);
+      - la estructura de navegación (teclado, táctil, rueda, progreso);
+      - las preguntas iniciales (propósito, longitud, contenido, densidad);
+      - la edición de textos en el navegador (tecla E);
+      - la idea de exportar a PDF capturando cada escena.
+    Respuestas a las preguntas iniciales:
+      Propósito: Enseñanza / tutorial · Longitud: 10–20 · Contenido: listo
+      · Densidad: baja, pensada para exponer.
+    La skill propone mostrar 3 estilos antes de empezar. Ese paso se saltó
+    porque el prompt ya definía la dirección de arte ("Technical cinematic /
+    premium hardware lab").
+
+  · El prompt pedía buscar también las skills "interactive-slides",
+    "deck-kit" y alguna de GSAP. No estaban instaladas, así que se hizo
+    todo con frontend-slides y código propio.
+
+LIBRERÍAS (incluidas en el proyecto)
+  · GSAP 3.15: animaciones (gsap.com)
+  · Fuentes Archivo e IBM Plex Mono (Google Fonts, licencia OFL),
+    guardadas en local para que funcione sin conexión
+
+HERRAMIENTAS DE PRUEBA Y EXPORTACIÓN
+  · Playwright-core con el navegador Brave: capturas automáticas, pruebas
+    de clics, arrastre, teclado y quiz
+  · pdf-lib: generación del PDF
+  · python-pptx: versión PPTX (incluida en el ZIP)
+  · Node.js 22 y Python 3
+
+MÚSICA Y SONIDOS
+  · No se usa ningún archivo de audio. La música ambiente y los efectos
+    se generan en el navegador con la Web Audio API: acordes lentos,
+    bajo, notas con eco y reverb, todo sintetizado. No hay problemas de
+    derechos de autor y funciona sin internet.
+
+
+----------------------------------------------------------------------
+3. CÓMO SE HIZO (PROCESO)
+----------------------------------------------------------------------
+
+1) PREPARACIÓN
+   Se instaló la skill frontend-slides y se respondieron sus preguntas.
+   Se descargaron GSAP y las fuentes a la carpeta del proyecto.
+
+2) ARQUITECTURA
+   Idea central: UNA SOLA PLACA BASE para toda la presentación.
+   · Se dibujó una placa ATX original en SVG, a escala real (244 × 305 mm),
+     con socket, VRM, ranuras DIMM, PCIe, M.2, SATA, chipset, chip de BIOS,
+     pila CMOS, audio, LAN, headers y panel trasero.
+   · Una "cámara virtual" se desplaza y hace zoom sobre esa misma placa al
+     cambiar de escena. Así la presentación se ve como una toma continua,
+     no como diapositivas sueltas.
+   · Cada componente tiene estados (reposo, hover, activo, seleccionado,
+     pista, correcto, error) y su propia micro-animación.
+   · Las rutas de datos y de energía se dibujan sobre la placa como una
+     capa de "diagnóstico".
+
+3) CONTENIDO
+   Se redactaron textos breves para cada componente (qué es, qué hace,
+   con qué conecta) y se revisaron los conceptos que suelen explicarse mal:
+   · LGA/PGA como conceptos físicos, no como "Intel frente a AMD"
+     (AM5 es LGA; AM4 era PGA).
+   · El controlador de memoria está en la CPU; el chipset (PCH) es el hub
+     de entrada/salida.
+   · PCIe: más lanes = enlace más ancho, no "16 veces más rápido";
+     tamaño físico ≠ lanes eléctricas.
+   · M.2 es el formato, NVMe el protocolo; existen SSD M.2 SATA.
+   · UEFI es el estándar moderno; "BIOS" se sigue usando por costumbre.
+   · La pila CMOS mantiene el reloj (RTC); no "alimenta la BIOS".
+   · Secuencia de arranque: PS_ON#, Power Good, entrenamiento de memoria,
+     partición EFI, cargador del sistema.
+   Nota: se añadió el nombre de la placa elegida sin rehacer el contenido
+   técnico. La ilustración es una recreación esquemática.
+
+4) ESCENAS INTERACTIVAS
+   Mapa con 17 zonas clicables, comparador de factores de forma,
+   LGA/PGA en sección microscópica, esquema de la CPU, fases del VRM con
+   osciloscopio, canales de memoria, chipset "hoy/antes", lanes y
+   generaciones PCIe, panel trasero, headers, consola UEFI, pila RTC,
+   viajes de la energía y de los datos, arranque paso a paso,
+   "Construye tu PC" (arrastrar y soltar con explicación de los errores)
+   y un quiz de 10 preguntas de 5 tipos.
+
+5) CONTROL DE CALIDAD (QA)
+   Un script abre la presentación en un navegador, captura las 24 escenas
+   y busca textos desbordados y errores. Otro script hace clic, arrastra,
+   usa el teclado y completa el quiz. Se revisaron las capturas a mano y
+   se corrigieron, entre otros:
+   · la placa quedaba por encima del texto (orden de capas);
+   · había elementos invisibles por un conflicto entre animaciones GSAP y
+     transiciones CSS;
+   · estados de una escena "se colaban" en la siguiente;
+   · había solapes de texto en la portada, la energía y el cierre;
+   · la cámara seguía inclinada al saltar de la intro al final.
+   También se comprobó en 1280×720, en móvil y con el modo de movimiento
+   reducido (accesibilidad).
+
+6) ENTREGA
+   · Se generó un HTML de un solo archivo con todo incrustado (CSS, JS,
+     fuentes), para poder subirlo solo.
+   · PDF y PPTX exportados automáticamente.
+   · Se añadieron la autoría, la placa elegida, música ambiente activada
+     por defecto (tecla M o botón para quitarla) y efectos de sonido
+     suaves y distintos según el elemento pulsado (botones, opciones,
+     zonas de la placa, cambio de escena, abrir y cerrar).
+   · Corrección: la tarjeta gráfica tapaba la ranura PCIe x1 y la tarjeta
+     de red quedaba oculta en "Construye tu PC"; se ajustó el dibujo y se
+     aclararon los mensajes. El icono del ventilador (headers FAN) giraba
+     fuera de su sitio; ahora es un mini ventilador junto a cada header.
+   · En "Construye tu PC", las piezas de cable (EPS 8 pines, ATX 24
+     pines, ventilador de CPU, botón de encendido y SSD SATA) muestran
+     una animación: el conector llega con su mazo de cables de colores,
+     encaja en los pines con un "clic" y, tras un momento, se desvanece
+     para no tapar la placa.
+   · Corrección: algunas micro-animaciones (puertos SATA, contactos de la
+     RAM, lanes PCIe) parpadeaban solas; ahora sólo se animan al pasar el
+     ratón o al seleccionar el componente.
+   · Nueva escena 22, "La placa en vivo": placa en 3D que se gira
+     arrastrando, cámara térmica con temperaturas, consumo en vatios en
+     tiempo real según la carga (reposo / juego / render) y sonido de la
+     placa según dónde esté el ratón (ventiladores, bobinas del VRM,
+     zumbido eléctrico).
+   · Cámara sin parpadeos: al empezar cada movimiento la placa se
+     "fotografía" en un canvas y es esa imagen la que se mueve (como hacen
+     los mapas web). Así el navegador no redibuja el SVG durante el
+     movimiento y no pueden aparecer zonas negras.
+   · Más variedad de sonidos: algunos efectos alternan de vez en cuando
+     con una variante (cierre metálico, interruptor con muelle,
+     trinquete) para que no suenen siempre igual.
+   · Toque estilo menú HOME de Nintendo Switch (un "pop" suave y redondo)
+     al elegir respuestas del quiz y piezas de "Construye tu PC". Como en
+     la consola, su tono depende del tamaño de lo que se pulsa: los botones
+     grandes suenan más graves y los pequeños, más agudos. Es una recreación
+     sintetizada (no se usa audio original de Nintendo).
+   · Estela de luz estilo moto de luz en un solo momento: cuando salen
+     los cables de la fuente en "El viaje de la energía".
+   · En "Construye tu PC" cada pieza tiene su propio encaje: la CPU se
+     posa, la palanca baja con trinquete y la placa metálica cierra; la RAM
+     encaja con un clic estilo mando Joy-Con; la gráfica encaja pesada con su clip y
+     tornillos; el SSD M.2 entra y se atornilla; el EPS y el ATX se empujan
+     y enganchan (el de 24 pines con un cierre contundente); el ventilador
+     hace clic y arranca; el panel frontal suena a cinco pines pequeños.
+   · Sonidos de encaje mecánico ("clic-clac") cada vez que algo se
+     coloca: RAM, CPU en el socket, gráfica (encaje más grave), SSD M.2,
+     conectores SATA, piezas bien colocadas en "Construye tu PC" y
+     respuestas correctas del quiz (encaje + campanita). Al fallar suena
+     un tono grave suave.
+   · Varios sonidos eléctricos, todos sintetizados, según lo que ocurre:
+       - "power": la corriente arranca (portada, POWER, cierre)
+       - "zap": arco eléctrico corto (llegan los 12 V al VRM, MOSFET, GPU)
+       - "surge": condensador cargándose (energía a la CPU, sistema completo)
+       - "buzz": zumbido de transformador (standby, chipset, inductor)
+       - "flow": pulsos de corriente que aceleran (energía a la RAM, fase)
+       - "spark": chisporroteo (consola UEFI al encender)
+       - "trickle": corriente recorriendo un cable (energía, headers, CPU)
+       - "pulse": latido eléctrico que sube de tono (lanes PCIe x1→x16,
+         cierre, bloques de la CPU)
+       - "bits": datos viajando (rutas de datos, RAM, SATA, chipset)
+       - "hum": zumbido estable (VRM en marcha, ventiladores)
+     Cada paso del arranque (escena 21) tiene su propio sonido.
+   · El quiz tiene sus propios sonidos: escáner al aparecer cada pregunta,
+     tres variantes de acierto y tres de fallo, racha (cada acierto
+     seguido suena más agudo y con chispas), un tono ascendente por cada
+     paso bien ordenado o pareja bien unida, un tic por cada punto al
+     contar la nota y un final distinto según la puntuación.
+
+CONTROLES
+   ← →  / Espacio   navegar         F   pantalla completa
+   Inicio / Fin     primera/última  M   música y sonidos sí/no
+   Esc              cerrar panel    E   editar textos
+
+
+----------------------------------------------------------------------
+4. PROMPT ORIGINAL (texto completo, tal como se escribió)
+----------------------------------------------------------------------
+
+QUIERO QUE ACTÚES COMO UN EQUIPO COMPLETO DE ESTUDIO DIGITAL PREMIUM:
+
+- Director creativo
+- Director de arte
+- Diseñador UX/UI
+- Diseñador de motion graphics
+- Frontend engineer senior
+- Information designer
+- Diseñador de experiencias educativas
+- Technical writer de hardware
+- QA engineer visual
+- Performance engineer
+
+NO quiero que me hagas “unas diapositivas”.
+
+QUIERO QUE CREES UNA EXPERIENCIA INTERACTIVA WEB DE NIVEL PROFESIONAL, comparable a una pieza premium de Genially / Apple keynote interactiva / micrositio educativo, construida con código y pensada para impresionar visualmente.
+
+============================================================
+OBJETIVO
+============================================================
+
+Crear una mega presentación interactiva y animada titulada:
+
+“LA PLACA BASE POR DENTRO”
+Subtítulo:
+“Descubre qué hace cada componente y cómo se comunican entre sí.”
+
+Tema:
+COMPONENTES DE UNA PLACA BASE / MOTHERBOARD
+
+La presentación debe explicar de forma visual, intuitiva y técnicamente correcta:
+
+- Qué es una placa base
+- Factor de forma
+- Socket de CPU
+- CPU / procesador
+- VRM y alimentación
+- RAM / DIMM
+- Canales de memoria
+- Chipset / PCH
+- Ranuras PCIe
+- GPU
+- M.2 / NVMe
+- SATA
+- BIOS / UEFI
+- Batería CMOS / RTC
+- Panel trasero / I/O
+- Headers internos
+- Ethernet / audio / Wi-Fi si procede
+- Conectores de alimentación
+- Flujo de energía
+- Flujo de datos
+- Relación CPU ↔ RAM ↔ PCIe ↔ almacenamiento ↔ chipset
+- Diferencias entre generaciones/plataformas cuando sea necesario
+- Qué ocurre desde que pulsas el botón de encendido hasta que arranca el sistema
+
+IMPORTANTE:
+NO copies de forma acrítica la información de ninguna presentación de referencia.
+Debes actualizar la terminología y corregir simplificaciones o conceptos obsoletos.
+
+============================================================
+REFERENCIA VISUAL
+============================================================
+
+Analiza como inspiración esta referencia de Genially:
+
+https://view.genially.com/68c27a4522e7e76c40a5440f
+
+La referencia debe servir para entender:
+
+- estructura educativa
+- concepto de hotspots
+- navegación por zonas
+- identificación física de componentes
+- uso de una placa base como mapa interactivo
+
+PERO NO LA COPIES.
+
+Quiero una evolución radicalmente superior:
+
+Genially -> versión cinematográfica, técnica, moderna, interactiva y premium.
+
+Debe parecer que detrás hay un equipo profesional de:
+Figma + motion design + 3D/WebGL + frontend + instructional design.
+
+============================================================
+PRIORIDAD DE SKILLS
+============================================================
+
+Antes de comenzar:
+
+1. Comprueba las skills instaladas.
+2. Busca específicamente si existe:
+   - frontend-slides
+   - interactive-slides
+   - deck-kit
+   - alguna skill de GSAP / animation
+3. Si `frontend-slides` no está instalada, instálala:
+   npx skills add https://github.com/zarazhangrui/frontend-slides --skill frontend-slides
+
+4. Si existe una skill de GSAP avanzada instalada, úsala.
+5. Si existe interactive-slides, úsala como referencia arquitectónica para interacciones.
+6. Si existe deck-kit, aprovecha sus ideas de motion, diagramas y QA.
+7. NO mezcles arquitecturas incompatibles sin necesidad.
+8. Mantén un único sistema visual y técnico coherente.
+
+PRINCIPIO:
+La skill es una herramienta, no una limitación.
+Si sus defaults no permiten conseguir el nivel visual solicitado, amplíalos mediante código propio.
+
+============================================================
+FORMATO TÉCNICO
+============================================================
+
+La presentación principal debe ser una EXPERIENCIA HTML WEB INTERACTIVA.
+
+Prioridad:
+
+1. HTML/CSS/JS
+2. SVG para diagramas y componentes
+3. GSAP para motion
+4. Canvas sólo cuando aporte valor real
+5. WebGL / Three.js sólo si aporta un efecto realmente superior y no perjudica rendimiento
+
+No quiero PowerPoint como formato principal.
+
+La entrega principal debe ser:
+
+- index.html / presentación funcional
+- assets/
+- scripts/ si son necesarios
+- documentación breve
+- opcionalmente versión PPT/PDF como export
+
+La experiencia debe funcionar localmente en navegador.
+
+Debe ser posible abrirla y presentarla a pantalla completa.
+
+============================================================
+DIRECCIÓN ARTÍSTICA
+============================================================
+
+NO QUIERO:
+
+- estética de PowerPoint
+- tarjetas genéricas de IA
+- fondos morados genéricos
+- 20 cajas iguales
+- iconos aleatorios
+- listas de bullets como recurso principal
+- animaciones indiscriminadas
+- transiciones de fade repetidas
+- aspecto de dashboard SaaS
+- stock photos sin sentido
+- exceso de texto
+
+QUIERO:
+
+“TECHNICAL CINEMATIC / PREMIUM HARDWARE LAB”
+
+Inspiración conceptual:
+
+- PCB profesional
+- laboratorio de electrónica
+- blueprint técnico
+- interfaces de diagnóstico
+- placas de circuito
+- microchips
+- trazas electrónicas
+- osciloscopio
+- instrumentación
+- macro fotografía de hardware
+- visualización científica
+- interfaces de ingeniería
+- estética tecnológica premium
+
+Paleta conceptual:
+
+- negro carbón / grafito
+- verde PCB muy oscuro
+- gris metálico
+- blanco técnico
+- un color eléctrico para destacar rutas
+- un segundo color para energía
+- un tercer color para interacción
+
+NO hagas un arcoíris.
+
+Cada categoría de componente debe tener una codificación visual consistente.
+
+Por ejemplo:
+
+CPU = color 1
+MEMORIA = color 2
+I/O = color 3
+ENERGÍA = color 4
+ALMACENAMIENTO = color 5
+
+Pero usa estos colores de forma MUY controlada.
+
+============================================================
+REGLA DE ORO VISUAL
+============================================================
+
+Cada pantalla debe tener UN protagonista visual.
+
+No quiero:
+
+[título]
+[texto]
+[texto]
+[tarjeta]
+[tarjeta]
+[tarjeta]
+
+Quiero:
+
+UNA IDEA
++
+UNA VISUALIZACIÓN POTENTE
++
+INTERACCIÓN
++
+MICROCOPY
+
+El usuario debe poder entender gran parte de la diapositiva mirando primero y leyendo después.
+
+============================================================
+ESTRUCTURA GENERAL
+============================================================
+
+Construye aproximadamente 18-24 escenas/pantallas.
+
+No las diseñes como 24 slides independientes.
+
+Quiero una narrativa continua.
+
+La experiencia debe sentirse como una exploración.
+
+ESTRUCTURA:
+
+01 — INTRO / HERO
+02 — ¿QUÉ ES UNA PLACA BASE?
+03 — MAPA INTERACTIVO DE LA PLACA
+04 — FACTOR DE FORMA
+05 — SOCKET
+06 — CPU
+07 — VRM / ENERGÍA
+08 — RAM
+09 — CANALES DE MEMORIA
+10 — CHIPSET / PCH
+11 — PCI EXPRESS
+12 — GPU
+13 — M.2 / NVMe
+14 — SATA
+15 — PANEL TRASERO
+16 — HEADERS / CONECTORES
+17 — UEFI / BIOS
+18 — CMOS / RTC
+19 — VIAJE DE LA ENERGÍA
+20 — VIAJE DE LOS DATOS
+21 — DEL BOTÓN POWER AL ARRANQUE
+22 — “CONSTRUYE TU PC”
+23 — QUIZ INTERACTIVO
+24 — RESUMEN FINAL / TAKEAWAY
+
+============================================================
+ESCENA 01 — HERO
+============================================================
+
+Quiero un inicio espectacular.
+
+Pantalla negra.
+
+Aparece lentamente una silueta de una motherboard.
+
+Después aparecen:
+
+- líneas de PCB
+- pequeños impulsos eléctricos
+- nodos
+- conectores
+- labels técnicos
+
+La placa “cobra vida”.
+
+Una cámara virtual hace un ligero acercamiento.
+
+Texto:
+
+“LA PLACA BASE”
+
+Después:
+
+“Todo lo que ocurre dentro de tu PC pasa, de una forma u otra, por aquí.”
+
+Animación:
+
+- circuit traces
+- pulsos eléctricos
+- micro parallax
+- reveal de texto
+- glowing nodes
+- zoom cinematográfico
+
+NO exageres con el glow.
+
+Tiene que parecer tecnología real, no videojuego barato.
+
+============================================================
+ESCENA 02 — ¿QUÉ ES?
+============================================================
+
+Representa la motherboard como el:
+
+“SISTEMA NERVIOSO DEL PC”
+
+Visual:
+
+una placa base central.
+
+Alrededor:
+
+CPU
+RAM
+GPU
+SSD
+USB
+NETWORK
+AUDIO
+
+Anima conexiones desde esos elementos hacia la placa.
+
+Cuando el usuario hace click en un componente:
+
+la conexión se ilumina.
+
+Al mismo tiempo aparece una explicación corta:
+
+qué conecta
+para qué sirve
+qué tipo de comunicación utiliza
+
+============================================================
+ESCENA 03 — MAPA INTERACTIVO
+============================================================
+
+ESTA ES UNA DE LAS ESCENAS MÁS IMPORTANTES.
+
+Crear una motherboard visual grande.
+
+Puede ser SVG detallado o ilustración técnica propia.
+
+NO uses una imagen estática simple con círculos encima.
+
+Quiero sensación de:
+
+“interface de exploración técnica”.
+
+Al pasar el ratón:
+
+- componente se ilumina
+- aparece outline
+- aparece label
+- trazas cercanas reaccionan
+- pequeño zoom o elevación
+
+Al hacer click:
+
+- cámara hace zoom
+- resto de la placa baja ligeramente de contraste
+- componente pasa a primer plano
+- aparece panel informativo
+- se puede cerrar y volver al mapa
+
+Hotspots:
+
+CPU SOCKET
+VRM
+RAM
+PCIe x16
+PCIe x1/x4
+M.2
+SATA
+CHIPSET/PCH
+24-pin ATX
+CPU EPS
+BIOS/UEFI
+CMOS/RTC
+AUDIO
+LAN
+USB HEADERS
+FAN HEADERS
+REAR I/O
+
+Cada hotspot debe tener una microanimación diferente.
+
+============================================================
+ESCENA 04 — FACTOR DE FORMA
+============================================================
+
+Comparar visualmente:
+
+ATX
+microATX
+Mini-ITX
+
+No quiero tres tarjetas.
+
+Quiero que una placa grande entre desde fuera de pantalla.
+
+Después otra se superpone.
+
+Después otra.
+
+El usuario puede cambiar entre tamaños.
+
+Mostrar:
+
+- tamaño
+- número típico de slots
+- conectividad
+- uso habitual
+
+Animación:
+
+la placa se escala físicamente.
+
+Quiero que se entienda la diferencia de tamaño de un vistazo.
+
+============================================================
+ESCENA 05 — SOCKET
+============================================================
+
+Hacer una transición tipo macro.
+
+La cámara entra desde la motherboard hacia el socket.
+
+El socket se amplía.
+
+Luego aparece una vista microscópica:
+
+contactos
+pads
+mecanismo de retención
+
+Explicar:
+
+“Es la interfaz física y eléctrica entre CPU y placa.”
+
+Mostrar que distintos sockets soportan distintas familias/plataformas.
+
+NO convertir LGA/PGA en una regla universal Intel-vs-AMD.
+
+Mostrar LGA y PGA como CONCEPTOS físicos:
+
+LGA -> contactos/pines en el socket
+PGA -> pines en el procesador
+
+Cuando el usuario selecciona:
+
+LGA
+
+la animación muestra la superficie del socket.
+
+Cuando selecciona:
+
+PGA
+
+muestra los pines del CPU.
+
+============================================================
+ESCENA 06 — CPU
+============================================================
+
+Mostrar la CPU como un bloque que se “conecta” a la placa.
+
+Animar:
+
+CPU
+↓
+memoria
+↓
+PCIe
+↓
+chipset
+↓
+I/O
+
+Explicar visualmente:
+
+- núcleos
+- hilos
+- caché
+- controlador de memoria
+- líneas PCIe
+
+Evita tecnicismos innecesarios.
+
+El objetivo es:
+
+“qué relación tiene la CPU con la motherboard”.
+
+============================================================
+ESCENA 07 — VRM / ENERGÍA
+============================================================
+
+Una de las escenas más espectaculares.
+
+Mostrar alimentación entrando a la placa.
+
+Después:
+
+PSU
+↓
+conector ATX
+↓
+VRM
+↓
+CPU
+
+Quiero flujo de partículas o pulsos.
+
+Mostrar que el VRM convierte y regula la alimentación para entregar voltajes adecuados y estables a las partes que alimenta.
+
+Representar:
+
+FASE
+MOSFET
+INDUCTOR
+CONDENSADORES
+
+No hace falta una ingeniería electrónica exageradamente profunda, pero sí una visualización intuitiva.
+
+La energía debe parecer “viajar”.
+
+============================================================
+ESCENA 08 — RAM
+============================================================
+
+Mostrar una DIMM entrando físicamente en el slot.
+
+Animación tipo:
+
+magnetic snap.
+
+Después hacer zoom:
+
+RAM
+→ controlador de memoria
+→ CPU
+
+Mostrar:
+
+capacidad
+velocidad
+latencia
+canales
+
+No sobrecargar.
+
+============================================================
+ESCENA 09 — DUAL CHANNEL
+============================================================
+
+Crear un ejemplo visual de:
+
+1 módulo
+vs
+2 módulos correctamente configurados
+
+Usar dos canales como dos autopistas.
+
+En el escenario:
+
+Single Channel
+
+una carretera.
+
+Dual Channel
+
+dos carreteras.
+
+Mostrar que el concepto es:
+
+más vías paralelas de comunicación.
+
+No presentar cifras de rendimiento inventadas.
+
+============================================================
+ESCENA 10 — CHIPSET / PCH
+============================================================
+
+Mostrar una arquitectura dinámica.
+
+CPU en un lado.
+
+Chipset/PCH en otro.
+
+Conectar:
+
+USB
+SATA
+I/O
+network
+audio
+PCIe adicionales
+etc.
+
+Animar pequeñas líneas de datos.
+
+Utiliza la terminología moderna.
+
+Explica también, brevemente:
+
+“Antes existía la arquitectura northbridge/southbridge.
+Hoy muchas funciones que antes estaban fuera de la CPU se han integrado, y el chipset/PCH actúa principalmente como hub de I/O.”
+
+NO entrar en una clase histórica extensa.
+
+============================================================
+ESCENA 11 — PCI EXPRESS
+============================================================
+
+Quiero una animación MUY visual.
+
+Mostrar:
+
+x1
+x4
+x8
+x16
+
+como diferentes números de carriles.
+
+Haz que aparezcan carriles físicos luminosos.
+
+1
+4
+8
+16
+
+Después conectar:
+
+GPU
+NIC
+capturadora
+tarjeta de sonido
+etc.
+
+Explicar:
+
+más lanes = enlace más ancho
+
+No digas simplemente:
+
+“x16 = 16 veces más rápido”.
+
+Explica correctamente el concepto.
+
+También puedes visualizar generaciones PCIe como:
+
+Gen 3
+Gen 4
+Gen 5
+Gen 6
+Gen 7
+
+pero sólo si se explica como evolución de velocidad de enlace y sin llenar la pantalla de cifras.
+
+============================================================
+ESCENA 12 — GPU
+============================================================
+
+Mostrar una tarjeta gráfica entrando en PCIe x16.
+
+Después:
+
+GPU
+→ PCIe
+→ CPU / plataforma
+
+Crear una pequeña simulación de transferencia de datos.
+
+Mostrar:
+
+“la GPU no vive aislada:
+forma parte del sistema de comunicación de la plataforma.”
+
+============================================================
+ESCENA 13 — M.2 / NVMe
+============================================================
+
+Quiero una transición de cámara desde la motherboard hasta la zona M.2.
+
+El SSD entra con una animación física.
+
+Comparar visualmente:
+
+M.2 NVMe
+vs
+SATA SSD
+
+La metáfora:
+
+NVMe:
+camino directo y de alta velocidad basado en PCIe
+
+SATA:
+interfaz de almacenamiento distinta y más antigua
+
+No simplificar hasta el punto de introducir errores.
+
+============================================================
+ESCENA 14 — SATA
+============================================================
+
+Mostrar un cable SATA entrando.
+
+Después varios dispositivos:
+
+SSD
+HDD
+unidad óptica si se quiere como ejemplo histórico
+
+Las conexiones se dibujan automáticamente.
+
+Visualizar:
+
+motherboard → SATA → storage
+
+============================================================
+ESCENA 15 — REAR I/O
+============================================================
+
+Crear una recreación visual de un panel trasero.
+
+Debe ser INTERACTIVO.
+
+Cada puerto tiene hover/click:
+
+USB
+USB-C
+Ethernet
+Audio
+Display outputs
+etc.
+
+Al pulsarlo:
+
+se ilumina el puerto
+aparece el nombre
+aparece para qué sirve
+aparece un ejemplo de dispositivo
+
+No asumas que TODAS las placas tienen los mismos puertos.
+
+Usa “ejemplos habituales”.
+
+============================================================
+ESCENA 16 — HEADERS
+============================================================
+
+Explorar los pequeños conectores internos:
+
+USB headers
+fan headers
+front panel
+RGB/ARGB
+audio
+etc.
+
+Usar enfoque:
+
+“lo que casi nunca ves, pero conecta todo”.
+
+Una animación puede mostrar cables saliendo desde estos headers hacia:
+
+caja
+ventiladores
+USB frontal
+botones
+LEDs
+audio frontal
+
+============================================================
+ESCENA 17 — UEFI / BIOS
+============================================================
+
+Crear una animación de encendido.
+
+Pantalla negra.
+
+POWER
+
+→ firmware
+
+→ hardware initialization
+
+→ boot device
+
+→ operating system
+
+Representar el firmware de forma moderna:
+
+UEFI
+
+y explicar que “BIOS” sigue utilizándose coloquialmente para referirse al firmware de la placa aunque UEFI sea la interfaz/estándar moderno frente al BIOS legacy.
+
+Mostrar:
+
+CPU
+RAM
+storage
+
+apareciendo como comprobaciones.
+
+============================================================
+ESCENA 18 — CMOS / RTC
+============================================================
+
+Zoom a la batería.
+
+Explicar de manera sencilla:
+
+RTC / configuración persistente relacionada con firmware depende de la implementación y plataforma.
+
+Evitar decir que la batería “alimenta la BIOS” de forma simplista.
+
+Mostrar el concepto:
+
+mantener determinadas configuraciones / reloj en sistemas compatibles.
+
+============================================================
+ESCENA 19 — VIAJE DE LA ENERGÍA
+============================================================
+
+ESTA PANTALLA DEBE SER CASI UNA INFOGRAFÍA ANIMADA.
+
+PSU
+
+→ motherboard power
+
+→ VRM
+
+→ CPU / RAM / chipset / demás circuitos
+
+El usuario puede pulsar:
+
+CPU
+RAM
+GPU
+
+y observar el camino de alimentación correspondiente.
+
+============================================================
+ESCENA 20 — VIAJE DE LOS DATOS
+============================================================
+
+Una de las piezas clave.
+
+Crear un mapa dinámico de:
+
+CPU
+RAM
+PCIe
+GPU
+NVMe
+SATA
+USB
+Network
+
+Cuando el usuario seleccione un dispositivo:
+
+la ruta de datos se anima.
+
+Ejemplo:
+
+CPU → RAM
+CPU → GPU
+CPU → NVMe
+PCH → USB
+PCH → SATA
+
+La conexión activa se ilumina y las otras bajan de intensidad.
+
+Debe sentirse como una herramienta de diagnóstico de una motherboard.
+
+============================================================
+ESCENA 21 — DESDE POWER HASTA WINDOWS
+============================================================
+
+Hacer un “journey”.
+
+Usuario pulsa POWER.
+
+Después animar:
+
+1. PSU
+2. motherboard
+3. firmware
+4. CPU
+5. memoria
+6. dispositivos
+7. boot device
+8. cargador del sistema
+9. sistema operativo
+
+Cada paso ocupa visualmente la escena.
+
+Al hacer click en cada etapa:
+
+aparece una explicación.
+
+============================================================
+ESCENA 22 — CONSTRUYE TU PC
+============================================================
+
+Modo interacción.
+
+Presenta componentes:
+
+CPU
+RAM
+GPU
+NVMe
+SATA SSD
+Wi-Fi
+etc.
+
+El usuario arrastra o selecciona.
+
+Debe decidir dónde se conecta cada cosa.
+
+Ejemplo:
+
+“¿Dónde instalarías este componente?”
+
+Aparecen zonas de destino.
+
+Si acierta:
+
+microanimación de éxito.
+
+Si falla:
+
+explicación visual, no simplemente “incorrecto”.
+
+Esto debe ser educativo.
+
+============================================================
+ESCENA 23 — QUIZ
+============================================================
+
+8-10 preguntas.
+
+Tipos:
+
+- hotspot
+- seleccionar componente
+- verdadero/falso
+- elegir conexión
+- ordenar proceso
+- identificar slot
+- asociar función
+
+No quiero un formulario aburrido.
+
+Quiero una interfaz de “diagnóstico técnico”.
+
+Mostrar puntuación final.
+
+Pero evita gamificación infantil.
+
+Tiene que sentirse como:
+
+“hardware lab challenge”.
+
+============================================================
+ESCENA 24 — FINAL
+============================================================
+
+Volver a la placa completa.
+
+Todos los componentes vuelven a iluminarse.
+
+Aparecen progresivamente.
+
+CPU
+RAM
+VRM
+PCIe
+Storage
+I/O
+PCH
+Firmware
+
+Después aparece:
+
+“Una placa base no es sólo una placa.”
+
+Pausa.
+
+“Es la red que hace que todos los componentes trabajen juntos.”
+
+Final limpio.
+
+============================================================
+SISTEMA DE INTERACCIÓN
+============================================================
+
+Quiero como mínimo:
+
+- click
+- hover
+- keyboard navigation
+- swipe/touch
+- fullscreen
+- progress indicator
+- slide counter
+- hotspots
+- tooltips
+- modal/detail views
+- zoom into component
+- back navigation
+- active state
+- focus states
+
+Si es técnicamente razonable:
+
+- drag & drop
+- magnetic interaction
+- subtle 3D tilt
+- parallax
+- animated cursor
+- hover glow
+- SVG path drawing
+- morphing
+- animated counters
+- stateful diagrams
+
+Pero NO añadas efectos porque sí.
+
+============================================================
+SISTEMA DE MOTION
+============================================================
+
+Aquí quiero un nivel muy alto.
+
+Usa GSAP cuando aporte valor.
+
+No hagas:
+
+fade in
+fade in
+fade in
+fade in
+
+en todas las escenas.
+
+Quiero una gramática de motion.
+
+Ejemplos:
+
+- Camera push-in
+- Camera pull-out
+- Component reveal
+- Path draw
+- Line tracing
+- Stagger
+- Scale reveal
+- Magnetic snap
+- Morph
+- Data flow
+- Pulse
+- Mask reveal
+- Focus transition
+- Shared element transition
+- Zoom-through
+- Parallax
+- Layer separation
+- Dimensional depth
+- UI state change
+
+Cada transición debe tener un motivo.
+
+============================================================
+REGLA DE MOTION
+============================================================
+
+La animación debe explicar.
+
+Ejemplo:
+
+NO:
+“texto entra desde la izquierda porque queda bonito.”
+
+SÍ:
+“la línea de datos se desplaza de CPU a RAM porque está mostrando comunicación.”
+
+NO:
+“el botón hace bounce.”
+
+SÍ:
+“el módulo RAM hace snap al slot porque representa instalación física.”
+
+El movimiento debe enseñar el concepto.
+
+============================================================
+TRANSICIONES ENTRE ESCENAS
+============================================================
+
+Quiero shared elements.
+
+Ejemplo:
+
+Mapa motherboard
+↓
+zoom CPU
+↓
+macro socket
+↓
+salida de CPU
+↓
+volver al mapa
+
+Que parezca una única cámara explorando una placa real.
+
+Evita que cada slide parezca una página independiente.
+
+============================================================
+DISEÑO DE LA MOTHERBOARD
+============================================================
+
+Construye una motherboard visualmente rica.
+
+No quiero una simple foto rectangular.
+
+Preferiblemente:
+
+SVG / ilustración vectorial / composición técnica original.
+
+Debe tener:
+
+- PCB
+- socket
+- DIMM
+- VRM
+- PCIe
+- chipset
+- M.2
+- SATA
+- headers
+- conectores
+- rear I/O
+
+Cada parte debe poder convertirse en hotspot.
+
+Debe haber estados:
+
+idle
+hover
+active
+focused
+selected
+disabled
+
+============================================================
+TIPOGRAFÍA
+============================================================
+
+Tipografía moderna y técnica.
+
+Combina:
+
+Display sans / grotesk
++
+Mono para labels técnicos
+
+Jerarquía fuerte.
+
+Titulares grandes.
+
+Poco texto.
+
+Mucho espacio negativo.
+
+Nada de bloques enormes.
+
+============================================================
+MICROCOPY
+============================================================
+
+Cada componente debe tener:
+
+NOMBRE
+QUÉ ES
+QUÉ HACE
+CON QUÉ SE RELACIONA
+
+Formato aproximado:
+
+CPU SOCKET
+“La interfaz física que conecta la CPU con la placa.”
+
+Después:
+
+“Conecta: CPU ↔ motherboard”
+
+No hagas párrafos de 100 palabras.
+
+La profundidad debe aparecer progresivamente mediante interacción.
+
+============================================================
+CONTENIDO TÉCNICO
+============================================================
+
+Debes verificar los conceptos antes de implementarlos.
+
+Fuentes preferidas:
+
+- Intel
+- AMD
+- Microsoft
+- PCI-SIG
+- documentación técnica de fabricantes
+- estándares relevantes
+
+Si encuentras discrepancias:
+
+prioriza documentación técnica actual.
+
+Especialmente verifica:
+
+- UEFI / BIOS
+- CPU memory controller
+- PCH / chipset
+- PCIe lanes
+- M.2 / NVMe
+- SATA
+- LGA / PGA
+- DDR generations
+- VRM
+- power connectors
+- form factors
+
+No inventes especificaciones concretas de una placa si no has especificado un modelo.
+
+============================================================
+ACCESIBILIDAD
+============================================================
+
+Debe existir:
+
+- soporte prefers-reduced-motion
+- navegación con teclado
+- focus visible
+- contraste suficiente
+- aria labels para controles importantes
+- interacción no basada únicamente en hover
+
+Cuando reduced motion esté activado:
+
+mantén la experiencia funcional eliminando únicamente motion innecesario.
+
+============================================================
+PERFORMANCE
+============================================================
+
+La presentación debe ser fluida.
+
+No quiero:
+
+- animaciones que bloqueen el main thread
+- canvas innecesario
+- cientos de listeners
+- sombras gigantes en exceso
+- WebGL si no es necesario
+
+Prioriza:
+
+transform
+opacity
+SVG
+composición eficiente
+
+Lazy-load cuando tenga sentido.
+
+============================================================
+RESPONSIVE
+============================================================
+
+La experiencia principal debe utilizar un stage 16:9 de alta calidad.
+
+Objetivo de autoría:
+
+1920 × 1080
+
+Escalado proporcional.
+
+Debe funcionar en:
+
+desktop
+portátil
+tablet
+móvil
+
+En móvil puede simplificarse la experiencia, pero NO destruyas el diseño del escenario principal.
+
+============================================================
+NAVEGACIÓN
+============================================================
+
+Implementa:
+
+← → / Arrow keys
+Space
+Home
+End
+mouse/touch
+fullscreen
+progress
+
+Añade navegación discreta.
+
+Nada de UI gigantesca permanente.
+
+============================================================
+QA VISUAL
+============================================================
+
+ESTO ES OBLIGATORIO.
+
+No consideres terminada la presentación simplemente porque “el código funciona”.
+
+Debes:
+
+1. Ejecutarla.
+2. Abrirla/renderizarla en navegador.
+3. Revisar visualmente todas las escenas.
+4. Crear capturas/contact sheet si las herramientas disponibles lo permiten.
+5. Buscar:
+   - overflow
+   - texto cortado
+   - elementos fuera de pantalla
+   - overlaps
+   - z-index problems
+   - mala legibilidad
+   - animaciones que rompen
+   - botones que no responden
+   - hotspots desalineados
+   - layout inconsistente
+   - rendimiento deficiente
+
+6. Corregir.
+7. Repetir la revisión.
+
+NO me entregues la primera versión.
+
+Quiero una segunda pasada deliberada de “design polish”.
+
+============================================================
+QUALITY BAR
+============================================================
+
+La presentación final debe superar estos mínimos:
+
+CONTENIDO:
+9/10
+
+DISEÑO:
+9/10
+
+ANIMACIÓN:
+9/10
+
+INTERACCIÓN:
+9/10
+
+CLARIDAD EDUCATIVA:
+9/10
+
+PERFORMANCE:
+8/10
+
+ACCESSIBILITY:
+8/10
+
+NO quiero números visibles ni que enseñes estas puntuaciones.
+Son criterios internos de calidad.
+
+============================================================
+CRITERIO “NO AI SLOP”
+============================================================
+
+Antes de terminar, pregúntate:
+
+“¿Podría haber generado esto cualquier modelo con un prompt de 5 líneas?”
+
+Si la respuesta es sí:
+
+REHACER.
+
+Quiero:
+
+- composición propia
+- sistema visual coherente
+- motion con intención
+- diagramas hechos específicamente para el contenido
+- interacción real
+- storytelling
+- transiciones con continuidad
+- detalles técnicos
+- microinteracciones
+
+============================================================
+ENTREGABLES
+============================================================
+
+Entrega:
+
+/motherboard-presentation/
+  index.html
+  README.md
+  assets/
+  screenshots/
+  scripts/ si hace falta
+
+Y, si es posible:
+
+  presentation.pdf
+  presentation.pptx
+
+La versión HTML es LA PRINCIPAL.
+
+README.md debe explicar:
+
+- cómo abrirla
+- cómo navegar
+- estructura
+- cómo modificar contenidos
+- cómo cambiar colores
+- cómo cambiar componentes
+- cómo volver a exportar
+
+============================================================
+REGLA FINAL
+============================================================
+
+NO te detengas después de escribir el plan.
+
+NO quiero solamente:
+
+“Voy a hacer X, Y y Z.”
+
+Quiero que:
+
+PLANIFIQUES
+→ CONSTRUYAS
+→ EJECUTES
+→ PRUEBES
+→ RENDERICES
+→ REVISES
+→ CORRIJAS
+→ PULAS
+→ ENTREGUES
+
+Si la primera versión es correcta funcionalmente pero mediocre visualmente:
+
+NO la entregues.
+
+Haz otra iteración.
+
+La prioridad absoluta es:
+
+EXPERIENCIA + CLARIDAD + INTERACCIÓN + MOTION + CALIDAD VISUAL.
+
+Quiero que el resultado se sienta como una experiencia educativa tecnológica premium, no como una presentación hecha automáticamente.
+
+EMPIEZA.
+
+
+

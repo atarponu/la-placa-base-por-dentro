@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La placa base por dentro</title>
+<meta name="author" content="Atarponu">
+<meta name="keywords" content="placa base, ASUS TUF GAMING B650-PLUS WIFI">
+<meta name="description" content="Experiencia interactiva: qué hace cada componente de una placa base y cómo se comunican entre sí.">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/scenes.css">
+</head>
+<body>
+
+<!-- =====================================================================
+     ICONOS (sprite SVG propio, trazo técnico de 1.6px)
+     ===================================================================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-cpu" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="1.5"/><rect x="12" y="12" width="8" height="8"/><path d="M12 4v4M16 4v4M20 4v4M12 24v4M16 24v4M20 24v4M4 12h4M4 16h4M4 20h4M24 12h4M24 16h4M24 20h4"/></symbol>
+    <symbol id="i-ram" viewBox="0 0 32 32"><rect x="3" y="9" width="26" height="12" rx="1"/><path d="M7 21v3M10 21v3M13 21v3M19 21v3M22 21v3M25 21v3"/><rect x="6" y="12" width="4" height="6"/><rect x="12" y="12" width="4" height="6"/><rect x="18" y="12" width="4" height="6"/></symbol>
+    <symbol id="i-gpu" viewBox="0 0 32 32"><rect x="3" y="8" width="26" height="14" rx="1.5"/><circle cx="11" cy="15" r="4"/><circle cx="21" cy="15" r="4"/><path d="M6 22v3h12v-3"/></symbol>
+    <symbol id="i-ssd" viewBox="0 0 32 32"><rect x="2" y="11" width="28" height="10" rx="1"/><path d="M5 21v-10M27 13v6"/><rect x="8" y="13" width="5" height="6"/><rect x="15" y="13" width="5" height="6"/></symbol>
+    <symbol id="i-usb" viewBox="0 0 32 32"><path d="M16 28V6M16 6l-3 4h6zM16 22l-6-5v-4M16 19l6-4v-3"/><circle cx="10" cy="12" r="1.6"/><rect x="20.5" y="9.5" width="3" height="3"/><circle cx="16" cy="28" r="1.8"/></symbol>
+    <symbol id="i-net" viewBox="0 0 32 32"><rect x="12" y="4" width="8" height="6"/><rect x="4" y="22" width="8" height="6"/><rect x="20" y="22" width="8" height="6"/><path d="M16 10v6M8 22v-6h16v6"/></symbol>
+    <symbol id="i-audio" viewBox="0 0 32 32"><path d="M4 16h3M9 11v10M13 7v18M17 12v8M21 9v14M25 14v4M28 16h1"/></symbol>
+    <symbol id="i-hdd" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="2"/><circle cx="15" cy="14" r="7"/><circle cx="15" cy="14" r="1.5"/><path d="M23 24l-6-8"/></symbol>
+    <symbol id="i-disc" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="3"/><path d="M16 7a9 9 0 0 1 9 9"/></symbol>
+    <symbol id="i-fan" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="3"/><circle cx="16" cy="16" r="2.5"/><path d="M16 13.5c-1-4 2-7 5-6-1 3-2 5-5 6zM18.5 16c4-1 7 2 6 5-3-1-5-2-6-5zM16 18.5c1 4-2 7-5 6 1-3 2-5 5-6zM13.5 16c-4 1-7-2-6-5 3 1 5 2 6 5z"/></symbol>
+    <symbol id="i-led" viewBox="0 0 32 32"><rect x="2" y="13" width="28" height="6" rx="3"/><circle cx="8" cy="16" r="1.4"/><circle cx="16" cy="16" r="1.4"/><circle cx="24" cy="16" r="1.4"/><path d="M8 9v-3M16 9v-3M24 9v-3"/></symbol>
+    <symbol id="i-btn" viewBox="0 0 32 32"><circle cx="16" cy="17" r="10"/><path d="M16 6v10"/></symbol>
+    <symbol id="i-power" viewBox="0 0 32 32"><path d="M10 9a10 10 0 1 0 12 0"/><path d="M16 4v12"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 32 32"><path d="M4 12c7-7 17-7 24 0M8 16.5c4.5-4.5 11.5-4.5 16 0M12 21c2.3-2.3 5.7-2.3 8 0"/><circle cx="16" cy="25" r="1.6"/></symbol>
+    <symbol id="i-cable" viewBox="0 0 32 32"><rect x="9" y="3" width="14" height="10" rx="1"/><path d="M12 7h2M18 7h2M12 10h2M18 10h2M16 13v6c0 5-8 3-8 10"/></symbol>
+    <symbol id="i-psu" viewBox="0 0 32 32"><rect x="3" y="6" width="26" height="20" rx="1.5"/><circle cx="13" cy="16" r="6"/><path d="M13 10v12M7 16h12M24 11v10"/></symbol>
+    <symbol id="i-mon" viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="17" rx="1.5"/><path d="M12 27h8M16 22v5"/></symbol>
+    <symbol id="i-chip" viewBox="0 0 32 32"><rect x="7" y="7" width="18" height="18" rx="1"/><path d="M11 3v4M16 3v4M21 3v4M11 25v4M16 25v4M21 25v4"/></symbol>
+  </defs>
+</svg>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage" aria-live="polite">
+
+  <!-- ===== ATMÓSFERA ===== -->
+  <div class="atmo atmo-glow"></div>
+  <div class="atmo atmo-grid"></div>
+
+  <!-- ===== MUNDO: la placa persistente + cámara ===== -->
+  <div class="world" id="world"><div class="tilt" id="tilt"><div class="cam" id="cam"></div><canvas class="snap" id="snap" aria-hidden="true"></canvas></div></div>
+  <div class="scrim scrim-l" data-scrim="l"></div><div class="scrim scrim-r" data-scrim="r"></div><div class="scrim scrim-b" data-scrim="b"></div><div class="scrim scrim-t" data-scrim="t"></div>
+  <div class="tip" id="tip" role="status"></div>
+
+  <!-- =================================================================
+       01 · HERO
+       ================================================================= -->
+  <section class="slide scene s-hero" data-id="hero" data-title="Intro" aria-label="Introducción">
+    <div class="hero-top kicker"><span>Exploración interactiva</span><i></i><span>Hardware lab</span></div>
+    <div class="hero-copy">
+      <h1 class="h1" data-split data-edit>LA PLACA<br>BASE<br><span class="h1-out">POR DENTRO</span></h1>
+      <p class="hero-sub" data-edit>Descubre qué hace cada componente y cómo se comunican entre sí.</p>
+      <p class="hero-author mono">Por <b>Atarponu</b></p>
+      <p class="hero-board mono">Placa elegida · <b>ASUS TUF GAMING B650-PLUS WIFI</b> · AM5 · ATX</p>
+    </div>
+    <p class="hero-quote" data-edit><span class="q-mark"></span>Todo lo que ocurre dentro de tu PC pasa, de una forma u otra, por aquí.</p>
+    <div class="hero-hint mono"><span class="key">→</span> para empezar <span class="sep">/</span> <span class="key">F</span> pantalla completa <span class="sep">/</span> <span class="key">M</span> música</div>
+    <div class="hero-read mono" aria-hidden="true">
+      <div><span>FORM FACTOR</span><b>ATX · 305 × 244 mm</b></div>
+      <div><span>CAPAS PCB</span><b>MULTICAPA</b></div>
+      <div><span>ESTADO</span><b class="blink-ok">SEÑAL OK</b></div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       02 · ¿QUÉ ES?
+       ================================================================= -->
+  <section class="slide scene s-what" data-id="what" data-title="¿Qué es?" aria-label="Qué es una placa base">
+    <div class="col-l stack">
+      <div class="kicker"><b>02</b><i></i>Concepto</div>
+      <h2 class="h2" data-split data-edit>El sistema<br>nervioso<br>del PC</h2>
+      <p class="lede" data-edit>Una placa de circuito impreso <em>multicapa</em> que conecta, alimenta y coordina cada componente.</p>
+    </div>
+    <svg class="dg what-lines" id="whatLines" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
+    <div class="what-nodes" id="whatNodes"></div>
+    <div class="what-info panel" id="whatInfo" data-cat="cpu" aria-live="polite">
+      <div class="p-cat"><span class="cat-dot"></span><span class="wi-cat">Pulsa un componente</span></div>
+      <div class="wi-grid">
+        <div><span class="wi-k">Conecta</span><p class="wi-v wi-a">—</p></div>
+        <div><span class="wi-k">Para qué</span><p class="wi-v wi-b">Elige un nodo alrededor de la placa para ver cómo se une a ella.</p></div>
+        <div><span class="wi-k">Comunicación</span><p class="wi-v wi-c">—</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       03 · MAPA INTERACTIVO
+       ================================================================= -->
+  <section class="slide scene s-map" data-id="map" data-title="Mapa" aria-label="Mapa interactivo de la placa">
+    <div class="map-col">
+      <div class="map-head stack">
+        <div class="kicker"><b>03</b><i></i>Mapa interactivo</div>
+        <h2 class="h2 sm" data-split data-edit>Explora<br>la placa</h2>
+        <p class="note" data-edit>Pasa el ratón, usa <b>Tab</b> o pulsa sobre un componente para acercar la cámara.</p>
+      </div>
+      <div class="map-legend" id="mapLegend" role="list"></div>
+      <div class="panel map-panel" id="mapPanel" hidden>
+        <button class="p-close" aria-label="Cerrar y volver al mapa">✕</button>
+        <div class="p-cat"><span class="cat-dot"></span><span class="mp-cat"></span></div>
+        <div class="p-name mp-name"></div>
+        <p class="p-what mp-what"></p>
+        <p class="p-does mp-does"></p>
+        <div class="p-links mp-links"></div>
+        <div class="mp-actions"><button class="btn mp-go">Ver en detalle <span class="arr">→</span></button><span class="mono mp-esc">ESC · volver</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       04 · FACTOR DE FORMA
+       ================================================================= -->
+  <section class="slide scene s-form" data-id="form" data-title="Factor de forma" aria-label="Factores de forma">
+    <svg class="dg form-dg" id="formDg" width="1100" height="1000" viewBox="0 0 1100 1000" style="left:80px;top:40px"></svg>
+    <div class="col-r stack form-col">
+      <div class="kicker"><b>04</b><i></i>Factor de forma</div>
+      <h2 class="h2 sm" data-split data-edit>Mismo sistema,<br>distinto tamaño</h2>
+      <div class="seg" id="formSeg" role="group" aria-label="Elegir factor de forma">
+        <button data-f="atx" aria-pressed="true">ATX</button><button data-f="matx" aria-pressed="false">microATX</button><button data-f="itx" aria-pressed="false">Mini-ITX</button>
+      </div>
+      <div class="form-specs">
+        <div class="fs"><span class="fs-k">Tamaño</span><span class="fs-v"><b id="fsW">305</b> × <b id="fsH">244</b> mm</span></div>
+        <div class="fs"><span class="fs-k">Ranuras de expansión</span><span class="fs-v">hasta <b id="fsSlots">7</b></span></div>
+        <div class="fs"><span class="fs-k">Ranuras de RAM</span><span class="fs-v">habitualmente <b id="fsDimm">4</b></span></div>
+        <div class="fs fs-use"><span class="fs-k">Uso habitual</span><span class="fs-v" id="fsUse">Torres de sobremesa, máxima expansión.</span></div>
+      </div>
+      <p class="note" data-edit>Las tres comparten la esquina del panel trasero y la posición de los anclajes principales: por eso caben en cajas ATX.</p>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       05 · SOCKET
+       ================================================================= -->
+  <section class="slide scene s-socket" data-id="socket" data-title="Socket" aria-label="Socket de CPU">
+    <div class="col-l stack">
+      <div class="kicker"><b>05</b><i></i>Socket</div>
+      <h2 class="h2" data-split data-edit>El socket</h2>
+      <p class="lede" data-edit>La interfaz <em>física y eléctrica</em> entre CPU y placa: más de mil contactos en unos centímetros.</p>
+      <div class="seg" id="sockSeg" role="group" aria-label="Tipo de contacto">
+        <button data-t="lga" aria-pressed="true">LGA · contactos en el socket</button><button data-t="pga" aria-pressed="false">PGA · pines en la CPU</button>
+      </div>
+      <div class="sock-facts">
+        <p class="note sf-lga"><b>Ejemplos LGA:</b> LGA1700, LGA1851, AM5 (LGA1718).</p>
+        <p class="note sf-pga"><b>Ejemplos PGA:</b> AM4 (PGA1331) y muchas plataformas anteriores.</p>
+        <p class="note">No es una regla «Intel vs AMD»: AMD usa LGA en AM5. Y <b>mismo socket ≠ compatible</b>: también cuentan el chipset y la versión de UEFI.</p>
+      </div>
+    </div>
+    <svg class="dg sock-lead" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"><path class="lead" d="M1060 360 L1300 360 L1420 470"/><rect class="lead-box" x="1010" y="330" width="60" height="60"/></svg>
+    <div class="lens" id="lens">
+      <svg viewBox="0 0 460 460" width="460" height="460" id="lensSvg"></svg>
+      <div class="lens-tag mono">× 40 · sección</div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       06 · CPU
+       ================================================================= -->
+  <section class="slide scene s-cpu" data-id="cpu" data-title="CPU" aria-label="La CPU y la placa">
+    <div class="col-l stack cpu-col">
+      <div class="kicker"><b>06</b><i></i>Procesador</div>
+      <h2 class="h2 sm" data-split data-edit>La CPU<br>y la placa</h2>
+      <p class="lede" data-edit>La CPU calcula; la placa le da <em>energía</em> y le conecta <em>memoria</em> y <em>dispositivos</em>.</p>
+      <div class="panel cpu-read" id="cpuRead" data-cat="cpu" aria-live="polite">
+        <div class="p-cat"><span class="cat-dot"></span><span class="cr-k">Pulsa un bloque del chip</span></div>
+        <p class="p-does cr-v">Cada bloque del procesador tiene una relación distinta con la placa.</p>
+      </div>
+    </div>
+    <svg class="dg cpu-die" id="cpuDie" width="1300" height="1000" viewBox="0 0 1300 1000" style="left:620px;top:40px"></svg>
+  </section>
+
+  <!-- =================================================================
+       07 · VRM
+       ================================================================= -->
+  <section class="slide scene s-vrm" data-id="vrm" data-title="VRM · energía" aria-label="VRM y alimentación de la CPU">
+    <div class="col-l stack vrm-col">
+      <div class="kicker"><b>07</b><i></i>Energía</div>
+      <h2 class="h2 sm" data-split data-edit>VRM: de 12 V<br>a lo que pide<br>la CPU</h2>
+      <p class="note" data-edit>La fuente entrega <b>12 V</b>. La CPU trabaja a <b>≈1 V</b> y con corrientes muy altas que cambian en microsegundos. El VRM hace esa conversión.</p>
+    </div>
+    <svg class="dg vrm-cable" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0" id="vrmCable"></svg>
+    <div class="vrm-phase panel" data-cat="pwr">
+      <div class="p-cat"><span class="cat-dot"></span>Una fase, por dentro</div>
+      <svg id="phaseSvg" viewBox="0 0 700 250" width="700" height="250"></svg>
+      <p class="p-does vp-read" aria-live="polite">Pulsa cada pieza de la fase.</p>
+    </div>
+    <div class="scope" aria-label="Osciloscopio: fases intercaladas">
+      <div class="scope-h mono"><span>CH1–CH6 · FASES</span><span class="hl" style="--cat:var(--c-pwr)">VCORE ≈ ESTABLE</span></div>
+      <svg id="scopeSvg" viewBox="0 0 560 190" width="560" height="190"></svg>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       08 · RAM
+       ================================================================= -->
+  <section class="slide scene s-ram" data-id="ram" data-title="RAM" aria-label="Memoria RAM">
+    <div class="col-l stack">
+      <div class="kicker"><b>08</b><i></i>Memoria</div>
+      <h2 class="h2" data-split data-edit>RAM</h2>
+      <p class="lede" data-edit>Memoria de trabajo: rápida, <em>volátil</em> y conectada directamente al controlador de memoria de la CPU.</p>
+      <div class="ram-tabs" id="ramTabs" role="tablist">
+        <button role="tab" data-k="cap" aria-selected="true">Capacidad</button>
+        <button role="tab" data-k="spd" aria-selected="false">Velocidad</button>
+        <button role="tab" data-k="lat" aria-selected="false">Latencia</button>
+        <button role="tab" data-k="ch" aria-selected="false">Canales</button>
+      </div>
+      <div class="ram-read" id="ramRead" aria-live="polite"></div>
+    </div>
+    <div class="ram-path mono" aria-hidden="true"><span>DDR5 DIMM</span><i></i><span>bus de memoria</span><i></i><span class="hl" style="--cat:var(--c-cpu)">IMC · CPU</span></div>
+  </section>
+
+  <!-- =================================================================
+       09 · CANALES
+       ================================================================= -->
+  <section class="slide scene s-chan" data-id="chan" data-title="Canales" aria-label="Canales de memoria">
+    <div class="chan-head">
+      <div class="kicker"><b>09</b><i></i>Canales de memoria</div>
+      <h2 class="h2 sm" data-split data-edit>Una carretera<br>o dos</h2>
+    </div>
+    <div class="chan-side stack">
+      <div class="seg" id="chanSeg" role="group" aria-label="Configuración de memoria">
+        <button data-m="1" aria-pressed="false">1 módulo</button><button data-m="2" aria-pressed="true">2 módulos · A2 + B2</button>
+      </div>
+      <p class="note chan-msg" aria-live="polite"></p>
+    </div>
+    <svg class="dg chan-dg" id="chanDg" width="1680" height="560" viewBox="0 0 1680 560" style="left:120px;top:400px"></svg>
+    <p class="note chan-foot" data-edit><b>DDR5:</b> cada módulo se divide en dos subcanales de 32 bits. Aun así, una placa de sobremesa normal sigue siendo de <b>doble canal</b>. Consulta el manual para saber qué ranuras usar.</p>
+  </section>
+
+  <!-- =================================================================
+       10 · CHIPSET / PCH
+       ================================================================= -->
+  <section class="slide scene s-pch" data-id="chipset" data-title="Chipset · PCH" aria-label="Chipset o PCH">
+    <div class="pch-head">
+      <div class="kicker"><b>10</b><i></i>Chipset · PCH</div>
+      <h2 class="h2 sm" data-split data-edit>El hub de<br>entrada/salida</h2>
+    </div>
+    <div class="pch-side stack">
+      <div class="seg" id="pchSeg" role="group" aria-label="Arquitectura">
+        <button data-a="now" aria-pressed="true">Hoy</button><button data-a="old" aria-pressed="false">Antes · northbridge/southbridge</button>
+      </div>
+      <p class="note pch-msg" aria-live="polite"></p>
+    </div>
+    <svg class="dg pch-dg" id="pchDg" width="1760" height="700" viewBox="0 0 1760 700" style="left:80px;top:330px"></svg>
+  </section>
+
+  <!-- =================================================================
+       11 · PCI EXPRESS
+       ================================================================= -->
+  <section class="slide scene s-pcie" data-id="pcie" data-title="PCI Express" aria-label="PCI Express">
+    <div class="pcie-head">
+      <div class="kicker"><b>11</b><i></i>PCI Express</div>
+      <h2 class="h2 sm" data-split data-edit>Lanes: carriles<br>en paralelo</h2>
+    </div>
+    <div class="pcie-notes">
+      <p class="note"><b>Una lane</b> = dos pares diferenciales: uno envía y otro recibe, a la vez.</p>
+      <p class="note"><b>x16 no es «16 veces más rápido»:</b> es un enlace más ancho. Sólo ayuda si el dispositivo necesita ese ancho de banda.</p>
+      <p class="note"><b>Físico ≠ eléctrico:</b> una ranura de tamaño x16 puede tener cableadas sólo 4 lanes.</p>
+    </div>
+    <svg class="dg pcie-dg" id="pcieDg" width="1680" height="560" viewBox="0 0 1680 560" style="left:120px;top:330px"></svg>
+    <div class="pcie-ctl">
+      <div class="seg" id="laneSeg" role="group" aria-label="Ancho del enlace">
+        <button data-w="1" aria-pressed="false">x1</button><button data-w="4" aria-pressed="false">x4</button><button data-w="8" aria-pressed="false">x8</button><button data-w="16" aria-pressed="true">x16</button>
+      </div>
+      <div class="seg" id="genSeg" role="group" aria-label="Generación PCIe">
+        <button data-g="3" aria-pressed="false">Gen 3</button><button data-g="4" aria-pressed="true">Gen 4</button><button data-g="5" aria-pressed="false">Gen 5</button><button data-g="6" aria-pressed="false">Gen 6</button><button data-g="7" aria-pressed="false">Gen 7</button>
+      </div>
+      <p class="mono pcie-gen" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       12 · GPU
+       ================================================================= -->
+  <section class="slide scene s-gpu" data-id="gpu" data-title="GPU" aria-label="Tarjeta gráfica">
+    <div class="col-l stack gpu-col">
+      <div class="kicker"><b>12</b><i></i>Gráfica</div>
+      <h2 class="h2 sm" data-split data-edit>La GPU no<br>vive aislada</h2>
+      <p class="note" data-edit>Forma parte del sistema de comunicación de la plataforma: recibe órdenes y datos de la CPU a través de PCIe.</p>
+      <button class="btn solid" id="gpuSim">Simular transferencia <span class="arr">→</span></button>
+      <div class="gpu-chain mono" id="gpuChain">
+        <div class="gc" data-s="0"><span>01</span>CPU prepara órdenes y datos</div>
+        <div class="gc" data-s="1"><span>02</span>Viajan por PCIe x16 hasta la GPU</div>
+        <div class="gc" data-s="2"><span>03</span>La GPU los guarda en su VRAM y renderiza</div>
+        <div class="gc" data-s="3"><span>04</span>La imagen sale por los puertos de la GPU</div>
+      </div>
+      <p class="note" data-edit><b>Energía:</b> la ranura aporta hasta 75 W. El resto llega por cables directos desde la fuente (8 pines PCIe o 12V-2x6).</p>
+    </div>
+    <svg class="dg gpu-dg" id="gpuDg" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0" aria-hidden="true"></svg>
+  </section>
+
+  <!-- =================================================================
+       13 · M.2 / NVMe
+       ================================================================= -->
+  <section class="slide scene s-m2" data-id="m2" data-title="M.2 · NVMe" aria-label="M.2 y NVMe">
+    <div class="col-l stack m2-col">
+      <div class="kicker"><b>13</b><i></i>Almacenamiento</div>
+      <h2 class="h2 sm" data-split data-edit>M.2 es la forma.<br>NVMe, el idioma.</h2>
+    </div>
+    <div class="m2-stack" id="m2Stack">
+      <div class="ms-rows mono"><span></span><span>Formato</span><span>Bus</span><span>Protocolo</span><span>Camino típico</span></div>
+      <div class="ms-col" data-cat="sto" data-c="0"><h3>SSD M.2 NVMe</h3><span>M.2 (clave M)</span><span class="hl">PCIe x4</span><span class="hl">NVMe</span><span>directo a la CPU o al chipset</span></div>
+      <div class="ms-col" data-c="1"><h3>SSD M.2 SATA</h3><span>M.2 (clave B+M)</span><span>SATA</span><span>AHCI</span><span>controlador SATA</span></div>
+      <div class="ms-col" data-c="2"><h3>SSD 2,5" SATA</h3><span>2,5" + cable</span><span>SATA · 6 Gb/s</span><span>AHCI</span><span>controlador SATA</span></div>
+    </div>
+    <div class="m2-queue">
+      <div class="mq"><span class="mono">AHCI · 1 cola × 32 órdenes</span><svg id="qAhci" viewBox="0 0 330 70" width="330" height="70"></svg></div>
+      <div class="mq"><span class="mono hl" style="--cat:var(--c-sto)">NVMe · hasta 65 535 colas × 65 536 órdenes</span><svg id="qNvme" viewBox="0 0 330 70" width="330" height="70"></svg></div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       14 · SATA
+       ================================================================= -->
+  <section class="slide scene s-sata" data-id="sata" data-title="SATA" aria-label="SATA">
+    <div class="col-l stack sata-col">
+      <div class="kicker"><b>14</b><i></i>SATA</div>
+      <h2 class="h2" data-split data-edit>SATA</h2>
+      <p class="lede" data-edit>Un cable por dispositivo. Máximo <em>6 Gb/s</em> por puerto: de sobra para un disco duro, un límite para un SSD.</p>
+      <p class="note" data-edit><b>Dos cables:</b> datos (7 pines) a la placa y energía (15 pines) desde la fuente.</p>
+      <p class="note" data-edit><b>Ojo:</b> en algunas placas, usar ciertas ranuras M.2 desactiva puertos SATA. Consulta el manual.</p>
+    </div>
+    <svg class="dg sata-dg" id="sataDg" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
+  </section>
+
+  <!-- =================================================================
+       15 · PANEL TRASERO
+       ================================================================= -->
+  <section class="slide scene s-io" data-id="io" data-title="Panel trasero" aria-label="Panel trasero">
+    <div class="io-head">
+      <div class="kicker"><b>15</b><i></i>Rear I/O</div>
+      <h2 class="h2 sm" data-split data-edit>El panel trasero</h2>
+      <p class="note" data-edit>Una combinación <b>de ejemplo</b>: cada placa tiene la suya. Pulsa un puerto.</p>
+    </div>
+    <div class="io-wrap"><svg class="io-panel" id="ioPanel" viewBox="0 0 1680 330" width="1680" height="330"></svg></div>
+    <div class="io-read" id="ioRead" aria-live="polite">
+      <div class="ir-name">—</div>
+      <div class="ir-grid"><div><span class="wi-k">Para qué sirve</span><p class="ir-what"></p></div><div><span class="wi-k">Ejemplo</span><p class="ir-ex"></p></div></div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       16 · HEADERS
+       ================================================================= -->
+  <section class="slide scene s-hdr" data-id="headers" data-title="Headers" aria-label="Headers internos">
+    <div class="hdr-head">
+      <div class="kicker"><b>16</b><i></i>Headers internos</div>
+      <h2 class="h2 sm" data-split data-edit>Lo que casi nunca ves,<br>pero conecta todo</h2>
+    </div>
+    <div class="hdr-read panel" id="hdrRead" data-cat="io" aria-live="polite">
+      <div class="p-cat"><span class="cat-dot"></span><span class="hr-k">Pulsa un destino</span></div>
+      <p class="p-does hr-v">Pines del borde de la placa con cables que suben hasta la caja.</p>
+    </div>
+    <svg class="dg hdr-dg" id="hdrDg" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
+    <div class="hdr-dest" id="hdrDest"></div>
+  </section>
+
+  <!-- =================================================================
+       17 · UEFI / BIOS
+       ================================================================= -->
+  <section class="slide scene s-uefi" data-id="uefi" data-title="UEFI · BIOS" aria-label="UEFI y BIOS">
+    <div class="uefi-head">
+      <div class="kicker"><b>17</b><i></i>Firmware</div>
+      <h2 class="h2 sm" data-split data-edit>UEFI: el primer<br>programa que corre</h2>
+    </div>
+    <div class="term" id="term" aria-live="polite">
+      <div class="term-bar mono"><span>FIRMWARE CONSOLE</span><span>SPI FLASH · UEFI</span></div>
+      <div class="term-body mono" id="termBody"></div>
+      <button class="power-btn" id="uefiPower" aria-label="Encender"><svg width="46" height="46"><use href="#i-power"/></svg></button>
+    </div>
+    <div class="uefi-chain" id="uefiChain">
+      <div class="uc" data-s="0"><span class="uc-n">01</span><b>POWER</b><em>Botón → la fuente arranca</em></div>
+      <div class="uc" data-s="1"><span class="uc-n">02</span><b>FIRMWARE</b><em>UEFI sale del chip flash</em></div>
+      <div class="uc" data-s="2"><span class="uc-n">03</span><b>INICIALIZACIÓN</b><em><span class="chk" data-c="cpu">CPU</span><span class="chk" data-c="ram">RAM</span><span class="chk" data-c="pci">PCIe</span><span class="chk" data-c="sto">Almacenamiento</span></em></div>
+      <div class="uc" data-s="3"><span class="uc-n">04</span><b>BOOT DEVICE</b><em>Partición EFI del disco</em></div>
+      <div class="uc" data-s="4"><span class="uc-n">05</span><b>SISTEMA OPERATIVO</b><em>Recibe el control</em></div>
+    </div>
+    <div class="uefi-def">
+      <p class="note" data-edit><b>BIOS</b> fue el firmware original del PC. <b>UEFI</b> es el estándar moderno que lo sustituye (arranque seguro, discos GPT, interfaz gráfica). Seguimos diciendo «la BIOS» por costumbre.</p>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       18 · CMOS / RTC
+       ================================================================= -->
+  <section class="slide scene s-cmos" data-id="cmos" data-title="CMOS · RTC" aria-label="Pila CMOS y reloj RTC">
+    <div class="col-l stack">
+      <div class="kicker"><b>18</b><i></i>CMOS · RTC</div>
+      <h2 class="h2 sm" data-split data-edit>Una pila<br>para el reloj</h2>
+      <p class="lede" data-edit>Una pila de 3 V mantiene el <em>reloj en tiempo real</em> y, según la plataforma, algunos ajustes, cuando el PC está totalmente desconectado.</p>
+      <div class="seg" id="cmosSeg" role="group" aria-label="Estado de la alimentación">
+        <button data-p="on" aria-pressed="false">Fuente enchufada</button><button data-p="off" aria-pressed="true">Desenchufado</button>
+      </div>
+      <p class="note cmos-msg" aria-live="polite"></p>
+      <p class="note" data-edit><b>No</b> «alimenta la BIOS»: el firmware vive en un chip flash que no necesita energía para conservar los datos.</p>
+    </div>
+    <svg class="dg cmos-dg" id="cmosDg" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
+  </section>
+
+  <!-- =================================================================
+       19 · VIAJE DE LA ENERGÍA
+       ================================================================= -->
+  <section class="slide scene s-energy" data-id="energy" data-title="Viaje de la energía" aria-label="El viaje de la energía">
+    <div class="en-col stack">
+      <div class="kicker"><b>19</b><i></i>Infografía</div>
+      <h2 class="h2 sm" data-split data-edit>El viaje de<br>la energía</h2>
+      <div class="en-btns" id="enBtns" role="group" aria-label="Elegir destino de la energía">
+        <button data-k="cpu" aria-pressed="false"><svg><use href="#i-cpu"/></svg>CPU</button>
+        <button data-k="ram" aria-pressed="false"><svg><use href="#i-ram"/></svg>RAM</button>
+        <button data-k="gpu" aria-pressed="false"><svg><use href="#i-gpu"/></svg>GPU</button>
+        <button data-k="pch" aria-pressed="false"><svg><use href="#i-chip"/></svg>Chipset</button>
+      </div>
+      <div class="en-read" id="enRead" aria-live="polite"></div>
+      <div class="en-legend mono"><span><i style="--cat:var(--c-pwr)"></i>12 V</span><span><i class="l5"></i>5 V · 3,3 V</span><span><i class="lsb"></i>5 VSB (standby)</span></div>
+    </div>
+    <svg class="dg en-dg" id="enDg" width="1920" height="1080" viewBox="0 0 1920 1080" style="left:0;top:0"></svg>
+  </section>
+
+  <!-- =================================================================
+       20 · VIAJE DE LOS DATOS
+       ================================================================= -->
+  <section class="slide scene s-data" data-id="data" data-title="Viaje de los datos" aria-label="El viaje de los datos">
+    <div class="data-col stack">
+      <div class="kicker"><b>20</b><i></i>Diagnóstico</div>
+      <h2 class="h2 sm" data-split data-edit>El viaje de<br>los datos</h2>
+      <div class="data-btns" id="dataBtns" role="group" aria-label="Elegir dispositivo"></div>
+      <div class="data-read" id="dataRead" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       21 · DEL BOTÓN AL SISTEMA
+       ================================================================= -->
+  <section class="slide scene s-boot" data-id="boot" data-title="Del botón al sistema" aria-label="Del botón de encendido al sistema operativo">
+    <div class="boot-head">
+      <div class="kicker"><b>21</b><i></i>Secuencia de arranque</div>
+      <h2 class="h2 sm" data-split data-edit>Del botón<br>al sistema</h2>
+    </div>
+    <div class="boot-stage" id="bootStage" aria-live="polite">
+      <button class="power-big" id="bootPower" aria-label="Pulsar POWER"><svg width="70" height="70"><use href="#i-power"/></svg><span class="mono">POWER</span></button>
+      <div class="boot-step" id="bootStep" hidden>
+        <div class="bs-n"></div>
+        <div class="bs-name"></div>
+        <p class="bs-text"></p>
+        <div class="bs-part mono"></div>
+      </div>
+    </div>
+    <div class="boot-line" id="bootLine" role="list"></div>
+    <button class="btn boot-play" id="bootPlay" hidden>❚❚ Pausa</button>
+  </section>
+
+  <!-- =================================================================
+       22 · LA PLACA EN VIVO (3D · cámara térmica · consumo · sonido)
+       ================================================================= -->
+  <section class="slide scene s-live" data-id="live" data-title="La placa en vivo" aria-label="La placa en vivo">
+    <div class="live-col">
+      <div class="kicker"><b>22</b><i></i>Laboratorio en vivo</div>
+      <h2 class="h2 sm" data-split data-edit>La placa<br>en vivo</h2>
+      <p class="note live-help" data-edit>Arrastra la placa para girarla en 3D. Acerca el ratón a los ventiladores o al VRM para escucharlos.</p>
+      <div class="live-ctl">
+        <span class="mono live-k">CARGA DE TRABAJO</span>
+        <div class="seg" id="loadSeg" role="group" aria-label="Carga de trabajo">
+          <button data-l="idle" aria-pressed="true">Reposo</button><button data-l="game" aria-pressed="false">Jugando</button><button data-l="render" aria-pressed="false">Renderizando</button>
+        </div>
+        <div class="live-toggles">
+          <button class="tgl" id="tglThermal" aria-pressed="false"><span class="tgl-dot"></span>Cámara térmica</button>
+          <button class="tgl" id="tglSound" aria-pressed="true"><span class="tgl-dot"></span>Sonido de la placa</button>
+          <button class="tgl plain" id="tglCenter">⟲ Centrar vista</button>
+        </div>
+      </div>
+      <div class="watt panel" data-cat="pwr">
+        <div class="p-cat"><span class="cat-dot"></span>Consumo en tiempo real</div>
+        <div class="watt-big"><b id="wattNow">0</b><span>W</span></div>
+        <div class="watt-wall mono" id="wattWall"></div>
+        <div class="watt-bars" id="wattBars"></div>
+      </div>
+      <p class="note live-foot" data-edit>Valores orientativos de un PC de gama media: cada equipo es distinto.</p>
+    </div>
+    <div class="live-drag pe" id="liveDrag" data-nodrag data-noscroll aria-hidden="true"></div>
+    <div class="therm-scale mono" id="thermScale" aria-hidden="true"><span>30 °C</span><i></i><span>90 °C</span></div>
+  </section>
+
+  <!-- =================================================================
+       23 · CONSTRUYE TU PC
+       ================================================================= -->
+  <section class="slide scene s-build" data-id="build" data-title="Construye tu PC" aria-label="Construye tu PC">
+    <div class="build-col">
+      <div class="kicker"><b>23</b><i></i>Laboratorio</div>
+      <h2 class="h2 sm" data-split data-edit>Construye tu PC</h2>
+      <p class="note build-help" data-edit>Arrastra cada pieza a su sitio, o selecciónala y pulsa en la placa.</p>
+      <div class="tray" id="tray" data-nodrag></div>
+      <div class="build-read" id="buildRead" aria-live="polite"><span class="br-k mono">ESTADO</span><p class="br-v">0 / 10 piezas instaladas.</p></div>
+    </div>
+    <div class="drag-ghost" id="dragGhost" aria-hidden="true"></div>
+  </section>
+
+  <!-- =================================================================
+       24 · QUIZ
+       ================================================================= -->
+  <section class="slide scene s-quiz" data-id="quiz" data-title="Quiz" aria-label="Quiz">
+    <div class="quiz-col">
+      <div class="kicker"><b>24</b><i></i>Hardware lab challenge</div>
+      <div class="quiz-bar" id="quizBar" aria-hidden="true"></div>
+      <div class="quiz-card" id="quizCard" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- =================================================================
+       25 · FINAL
+       ================================================================= -->
+  <section class="slide scene s-end" data-id="end" data-title="Resumen" aria-label="Resumen final">
+    <div class="end-list mono" id="endList">
+      <span data-cat="cpu">CPU</span><span data-cat="mem">RAM</span><span data-cat="pwr">VRM</span><span data-cat="cpu">PCIe</span><span data-cat="sto">Almacenamiento</span><span data-cat="io">I/O</span><span data-cat="io">PCH</span><span data-cat="fw">Firmware</span>
+    </div>
+    <div class="end-copy">
+      <p class="end-a" data-edit>Una placa base no es sólo una placa.</p>
+      <p class="end-b" data-edit>Es la red que hace que todos los componentes trabajen juntos.</p>
+      <p class="end-credit mono">Presentación realizada por <b>Atarponu</b> · Placa elegida: <b>ASUS TUF GAMING B650-PLUS WIFI</b></p>
+      <button class="btn end-restart" id="endRestart">↺ Volver al inicio</button>
+    </div>
+  </section>
+
+  <div class="atmo atmo-vig"></div>
+  <div class="atmo atmo-grain"></div>
+</main>
+</div>
+
+<!-- ===== CHROME (fuera del escenario) ===== -->
+<header class="chrome chrome-top">
+  <div class="brand"><span class="brand-mark"></span><span>La placa base por dentro</span></div>
+  <div class="counter"><span id="sceneName"></span><span><b id="countNow">01</b> / <span id="countTotal">24</span></span></div>
+</header>
+<nav class="chrome chrome-bottom deck-controls-bar" aria-label="Navegación">
+  <div class="progress" id="progress"></div>
+  <div class="nav-btns">
+    <button class="nbtn" id="btnPrev" aria-label="Escena anterior">←</button>
+    <button class="nbtn" id="btnNext" aria-label="Escena siguiente">→</button>
+    <button class="nbtn music" id="btnMusic" aria-pressed="false" aria-label="Activar música (M)"><span></span><span></span><span></span><span></span></button>
+    <button class="nbtn" id="btnFs" aria-label="Pantalla completa (F)">⤢</button>
+  </div>
+</nav>
+<div class="music-toast" id="musicToast" role="status"></div>
+<div class="edit-hot" id="editHot"></div>
+<button class="edit-btn" id="editBtn" title="Modo edición (E)">EDITAR</button>
+<div class="edit-badge" id="editBadge">MODO EDICIÓN · E / ESC PARA SALIR</div>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/js/board-css.js"></script>
+<script src="assets/js/board.js"></script>
+<script src="assets/js/content.js"></script>
+<script src="assets/js/engine.js"></script>
+<script src="assets/js/scenes-a.js"></script>
+<script src="assets/js/scenes-b.js"></script>
+<script src="assets/js/music.js"></script>
+</body>
+</html>
